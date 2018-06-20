@@ -9,15 +9,15 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Tatsuya Sato"]
   spec.email         = ["tatsuya.b.sato@rakuten.com"]
 
-  spec.summary       = %q{TODO: Write a short summary, because RubyGems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
-  spec.license       = "MIT"
+  spec.summary       = %q{Storages available for Roma server.}
+  spec.description   = %q{This gem provides storage classes available for Roma server.}
+  spec.homepage      = "http://roma-kvs.org/"
+  spec.license       = "GPL-3.0"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
   if spec.respond_to?(:metadata)
-    spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
+    spec.metadata["allowed_push_host"] = "http://rubygems.org"
   else
     raise "RubyGems 2.0 or newer is required to protect against " \
       "public gem pushes."
