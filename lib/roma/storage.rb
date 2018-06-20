@@ -1,7 +1,5 @@
-require "roma/storage/version"
-
-module Roma
-  module Storage
-    # Your code goes here...
-  end
-end
+require 'roma/storage/version'
+require 'roma/storage/basic_storage'
+require 'roma/storage/dbm_storage'
+require 'roma/storage/dummy_storage'
+require 'roma/storage/ruby_hash_storage'
