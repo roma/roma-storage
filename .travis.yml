@@ -1,5 +1,24 @@
 sudo: false
 language: ruby
 rvm:
+  - 2.3.7
+  - 2.4.4
   - 2.5.1
-before_install: gem install bundler -v 1.16.1
+  - 2.6.0
+  - ruby-head
+
+before_install:
+  - gem install bundler
+
+matrix:
+  allow_failures:
+    - rvm: ruby-head
+
+script:
+  - bundle exec rake test
+
+notifications:
+  email: false
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/6f2391f05f5fd4d55bf0
