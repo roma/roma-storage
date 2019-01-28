@@ -1,5 +1,9 @@
 # Roma::Storage
 
+[![Build Status](https://travis-ci.org/roma/roma-storage.svg?branch=master)](https://travis-ci.org/roma/roma-storage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/c13d593018a15a64b6f8/maintainability)](https://codeclimate.com/github/roma/roma-storage/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/c13d593018a15a64b6f8/test_coverage)](https://codeclimate.com/github/roma/roma-storage/test_coverage)
+
 Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/roma/storage`. To experiment with that code, run `bin/console` for an interactive prompt.
 
 TODO: Delete this and the text above, and describe your gem
