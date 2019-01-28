@@ -8,14 +8,20 @@ rvm:
   - ruby-head
 
 before_install:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
   - gem install bundler
+
+script:
+  - bundle exec rake test
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 
 matrix:
   allow_failures:
     - rvm: ruby-head
-
-script:
-  - bundle exec rake test
 
 notifications:
   email: false
