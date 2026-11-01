@@ -156,8 +156,8 @@ module Roma
 
         if @dbs[n] == :cachecleaning && d
           # in case of existing value is both @hdb and @hdbc
-          vn, lat, clk, expt = unpack_header(d)
-          cvn, clat, cclk, cexpt = unpack_header(c)
+          vn, _lat, clk, _expt = unpack_header(d)
+          _cvn, _clat, cclk, _cexpt = unpack_header(c)
           return d if cmp_clk(clk, cclk) > 0 # if @hdb newer than @hdbc
         end
         c
@@ -226,7 +226,7 @@ module Roma
         buf = db_get(vn, k)
         clk = 0
         if buf
-          vn, t, clk, expt2, v2 = unpack_data(buf)
+          vn, _t, clk, expt2, _v2 = unpack_data(buf)
           return nil if Time.now.to_i <= expt2
           clk = (clk + 1) & 0xffffffff
         end
@@ -242,7 +242,7 @@ module Roma
         return nil unless buf
 
         # buf != nil
-        vn, t, clk, expt2, v2 = unpack_data(buf)
+        vn, _t, clk, expt2, _v2 = unpack_data(buf)
         return nil if Time.now.to_i > expt2
         clk = (clk + 1) & 0xffffffff
 
@@ -256,7 +256,7 @@ module Roma
         return nil unless buf
 
         # buf != nil
-        vn, t, clk, expt2, v2 = unpack_data(buf)
+        vn, _t, clk, expt2, v2 = unpack_data(buf)
         return nil if Time.now.to_i > expt2
         clk = (clk + 1) & 0xffffffff
 
@@ -270,7 +270,7 @@ module Roma
         return nil unless buf
 
         # buf != nil
-        vn, t, clk, expt2, v2 = unpack_data(buf)
+        vn, _t, clk, expt2, v2 = unpack_data(buf)
         return nil if Time.now.to_i > expt2
         clk = (clk + 1) & 0xffffffff
 
@@ -282,7 +282,7 @@ module Roma
       def get(vn, k, d)
         buf = db_get(vn, k)
         return nil unless buf
-        vn, t, clk, expt, v = unpack_data(buf)
+        vn, _t, _clk, expt, v = unpack_data(buf)
 
         return nil if Time.now.to_i > expt
         v
@@ -331,7 +331,7 @@ module Roma
         v = ret = nil
         clk = 0
         if buf
-          vn, t, clk, expt, v2 = unpack_data(buf)
+          vn, _t, clk, expt, v2 = unpack_data(buf)
           return :deletemark if expt == 0
           clk = (clk + 1) & 0xffffffff
           v = v2 if v2 && v2.length != 0 && Time.now.to_i <= expt
@@ -358,7 +358,7 @@ module Roma
         return nil unless buf
 
         # buf != nil
-        vn, t, clk, expt2, v2 = unpack_data(buf)
+        vn, _t, clk, expt2, v2 = unpack_data(buf)
         return nil if Time.now.to_i > expt2
         clk = (clk + 1) & 0xffffffff
 
@@ -376,7 +376,7 @@ module Roma
         return nil unless buf
 
         # buf != nil
-        vn, t, clk, expt2, v2 = unpack_data(buf)
+        vn, _t, clk, expt2, v2 = unpack_data(buf)
         return nil if Time.now.to_i > expt2
         clk = (clk + 1) & 0xffffffff
 
@@ -393,7 +393,7 @@ module Roma
       def set_expt(vn, k, d, expt)
         buf = db_get(vn, k)
         if buf
-          vn, t, clk, expt2, v = unpack_data(buf)
+          vn, _t, clk, expt2, v = unpack_data(buf)
           return nil if Time.now.to_i > expt2
           clk = (clk + 1) & 0xffffffff
           ret = [vn, Time.now.to_i, clk, expt, v]
@@ -467,7 +467,7 @@ module Roma
         h = Marshal.load(dmp)
         h.each_pair{ |k, v|
           # remort data
-          r_vn, r_last, r_clk, r_expt = unpack_header(v)
+          r_vn, r_last, r_clk, _r_expt = unpack_header(v)
           raise "An invalid vnode number is include.key=#{k} vn=#{r_vn}" unless @hdiv.key?(r_vn)
           local = @hdb[@hdiv[r_vn]].get(k)
           if local == nil
@@ -475,7 +475,7 @@ module Roma
             @hdb[@hdiv[r_vn]].put(k, v)
           else
             # local data
-            l_vn, l_last, l_clk, l_expt = unpack_data(local)
+            _l_vn, l_last, l_clk, _l_expt = unpack_data(local)
             if r_last - l_last < @logic_clock_expire && cmp_clk(r_clk,l_clk) <= 0
             else # remort is newer.
               n += 1
