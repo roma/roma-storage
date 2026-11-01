@@ -31,7 +31,7 @@ module Roma
             keys.each{ |k|
               v = hdb[k]
               return unless @do_clean_up
-              vn, last, clk, expt = unpack_header(v)
+              vn, last, _clk, expt = unpack_header(v)
               vn_stat = vnhash[vn]
               if vn_stat == :primary && ( (expt != 0 && nt > expt) || (expt == 0 && t > last) )
                 yield k, vn

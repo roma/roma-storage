@@ -7,32 +7,25 @@ Gem::Specification.new do |spec|
   spec.name          = "roma-storage"
   spec.version       = Roma::Storage::VERSION
   spec.authors       = ["Tatsuya Sato"]
-  spec.email         = ["tatsuya.b.sato@rakuten.com"]
+  spec.email         = ["satoryu.1981@gmail.com"]
 
-  spec.summary       = %q{Storages available for Roma server.}
-  spec.description   = %q{This gem provides storage classes available for Roma server.}
-  spec.homepage      = "https://roma-kvs.org/"
-  spec.license       = "GPL-3.0"
-  spec.required_ruby_version = '>= 2.3.0'
+  spec.summary       = %q{The storages of ROMA.}
+  spec.description   = %q{The base class of the storages of ROMA, and the storage on a Ruby Hash.}
+  spec.homepage      = "https://github.com/roma/roma-storage"
+  spec.license       = "GPL-3.0-only"
+  spec.required_ruby_version = '>= 3.4'
 
-  # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
-  # to allow pushing to a single host or delete this section to allow pushing to any host.
-  if spec.respond_to?(:metadata)
-    spec.metadata["allowed_push_host"] = "https://rubygems.org"
-  else
-    raise "RubyGems 2.0 or newer is required to protect against " \
-      "public gem pushes."
-  end
+  spec.metadata["allowed_push_host"] = "https://rubygems.org"
+  spec.metadata["source_code_uri"] = spec.homepage
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
-    f.match(%r{^(test|spec|features)/})
+    f.match(%r{^(test|spec|features|bin)/|^\.})
   end
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 2.0.0"
-  spec.add_development_dependency "rake", "~> 10.0"
+  spec.add_development_dependency "rake"
   spec.add_development_dependency "simplecov"
   spec.add_development_dependency "test-unit"
 end
