@@ -1,14 +1,14 @@
 require 'test_helper'
 
 require 'roma-test-storage'
-require 'roma/storage/ruby_hash_storage'
+require 'roma/storage/hash'
 
-class RubyHashStorageTest < Test::Unit::TestCase
+class HashStorageTest < Test::Unit::TestCase
   self.test_order = :defined
   include StorageTests
 
   def setup
-    @st=Roma::Storage::RubyHashStorage.new
+    @st=Roma::Storage::HashStorage.new
     @st.vn_list = [0,1,2,3,4,5,6,7,8,9]
     @st.opendb
   end
@@ -66,4 +66,26 @@ class RubyHashStorageTest < Test::Unit::TestCase
     assert_operator(0,:>, @st.send(:cmp_clk,clk2, clk1) )
   end
 
+end
+
+class RubyHashStorageNameTest < Test::Unit::TestCase
+  # The old name still works, with a warning.
+  def test_deprecated_name
+    require 'stringio'
+    require 'roma/storage/ruby_hash_storage'
+    saved_stderr = $stderr
+    saved = Warning[:deprecated]
+    Warning[:deprecated] = true
+    $stderr = StringIO.new
+    assert_same Roma::Storage::HashStorage, Roma::Storage::RubyHashStorage
+    assert_match(/RubyHashStorage is deprecated/, $stderr.string)
+  ensure
+    $stderr = saved_stderr
+    Warning[:deprecated] = saved
+  end
+
+  def test_storage
+    out = IO.popen([RbConfig.ruby, '-Ilib', '-e', 'require "roma/storage"; print Roma::Storage::HashStorage'], &:read)
+    assert_equal 'Roma::Storage::HashStorage', out
+  end
 end
