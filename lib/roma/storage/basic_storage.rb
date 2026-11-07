@@ -14,10 +14,12 @@ module Roma
       attr_reader :ext_name
       attr_reader :error_message
       attr_reader :dbs
+      attr_reader :each_vn_dump_files
 
       attr_writer :vn_list
-      attr_writer :storage_path
-      attr_writer :option
+
+      attr_accessor :storage_path
+      attr_accessor :option
 
       attr_accessor :st_class
       attr_accessor :divnum
@@ -58,20 +60,12 @@ module Roma
         @stat_lock = Mutex::new
       end
 
-      def stat
-        ret = {}
-        ret['storage.storage_path'] = File.expand_path(@storage_path)
-        ret['storage.st_class'] = @st_class.to_s.match(/Roma::Storage::(.*)/)[1]
-        ret['storage.divnum'] = @divnum
-        ret['storage.option'] = @option
-        ret['storage.each_vn_dump_sleep'] = @each_vn_dump_sleep
-        ret['storage.each_vn_dump_sleep_count'] = @each_vn_dump_sleep_count
-        ret['storage.each_vn_dump_files'] = @each_vn_dump_files.inspect
-        ret['storage.each_clean_up_sleep'] = @each_clean_up_sleep
-        ret['storage.cleanup_regexp'] = @cleanup_regexp
-        ret['storage.logic_clock_expire'] = @logic_clock_expire
-        ret['storage.safecopy_stats'] = @dbs.inspect
-        ret
+      # Details of each database file that a storage engine can tell, such
+      # as its path and the number of records, as an Array of Hashes. ROMA
+      # shows them in the result of its stat command. This storage tells
+      # none.
+      def database_stats
+        []
       end
 
       # Compare this clock with the specified.

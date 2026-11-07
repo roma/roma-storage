@@ -16,10 +16,8 @@ class HashStorageTest < Test::Unit::TestCase
   def teardown
   end
 
-  def test_stat
-    @st.storage_path = 'storage'
-    @st.st_class = Roma::Storage::HashStorage
-    assert_equal('HashStorage', @st.stat['storage.st_class'])
+  def test_database_stats
+    assert_equal([], @st.database_stats)
   end
 
   def test_cmp_clk
