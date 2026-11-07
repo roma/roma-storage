@@ -58,7 +58,7 @@ module Roma
         @stat_lock = Mutex::new
       end
 
-      def get_stat
+      def stat
         ret = {}
         ret['storage.storage_path'] = File.expand_path(@storage_path)
         ret['storage.st_class'] = @st_class.to_s.match(/Roma::Storage::(.*)/)[1]

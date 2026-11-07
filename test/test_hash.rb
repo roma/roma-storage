@@ -16,6 +16,10 @@ class HashStorageTest < Test::Unit::TestCase
   def teardown
   end
 
+  def test_stat
+    assert_equal('HashStorage', @st.stat['storage.st_class'])
+  end
+
   def test_cmp_clk
     (0x001E00000..0x002000000).each{|clk|
       assert_equal(0, @st.send(:cmp_clk,clk, clk) )
