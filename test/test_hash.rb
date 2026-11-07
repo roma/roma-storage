@@ -17,6 +17,8 @@ class HashStorageTest < Test::Unit::TestCase
   end
 
   def test_stat
+    @st.storage_path = 'storage'
+    @st.st_class = Roma::Storage::HashStorage
     assert_equal('HashStorage', @st.stat['storage.st_class'])
   end
 
