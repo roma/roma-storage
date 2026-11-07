@@ -80,7 +80,7 @@ module Roma
         end
 
         # Create vnode dump.
-        def get_vnode_hash(vn)
+        def vnode_hash(vn)
           buf = {}
           count = 0
           hdb = @hdb[@hdiv[vn]]
@@ -94,7 +94,7 @@ module Roma
           }
           return buf
         end
-        private :get_vnode_hash
+        private :vnode_hash
         
       end
 

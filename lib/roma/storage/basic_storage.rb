@@ -167,7 +167,7 @@ module Roma
         ret
       end
 
-      def get_context(vn, k, d)
+      def context(vn, k, d)
         buf = db_get(vn, k)
         return nil unless buf
         unpack_header(buf)
@@ -282,14 +282,14 @@ module Roma
         v
       end
 
-      def get_raw(vn, k, d)
+      def raw(vn, k, d)
         buf = db_get(vn, k)
         return nil unless buf
 
         unpack_data(buf)
       end
 
-      def get_raw2(k)
+      def find_raw(k)
         @hdb.each{|hdb|
           buf = hdb.get(k)
           return unpack_data(buf) if buf
@@ -522,7 +522,7 @@ module Roma
 
       # Returns the vnode dump.
       def dump(vn)
-        buf = get_vnode_hash(vn)
+        buf = vnode_hash(vn)
         return nil if buf.length == 0
         Marshal.dump(buf)
       end
@@ -620,7 +620,7 @@ module Roma
       # Returns a key array in a cache(@hdbc).
       # +dn+:: number of database
       # +kn+:: number of keys which is return value
-      def get_keys_in_cache(dn, kn=100)
+      def keys_in_cache(dn, kn=100)
         return nil if @do_each_vn_dump
         ret = []
         return ret unless @hdbc[dn]
@@ -635,7 +635,7 @@ module Roma
       end
 
       # Create vnode dump.
-      def get_vnode_hash(vn)
+      def vnode_hash(vn)
         buf = {}
         count = 0
         @hdb[@hdiv[vn]].each{ |k, v|
@@ -646,7 +646,7 @@ module Roma
         }
         return buf
       end
-      private :get_vnode_hash
+      private :vnode_hash
 
       def flush_db(dn)
         @hdb[dn].sync
@@ -656,50 +656,50 @@ module Roma
         "#{@storage_path}/#{dn}.cache.#{@ext_name}"
       end
 
-      def set_db_stat(dn, stat)
+      def update_db_status(dn, status)
         @stat_lock.synchronize do
           case @dbs[dn]
           when :normal
             @each_vn_dump_vnodes.each do |vn|
               return false if dn == @hdiv[vn]
             end
-            if stat == :safecopy_flushing
+            if status == :safecopy_flushing
               # open cache
               @hdbc[dn] = open_db(cache_file_name(dn))
-              stop_clean_up { @dbs[dn] = stat }
-              write_log("#{dn} #{stat.to_s}")
-              stat
+              stop_clean_up { @dbs[dn] = status }
+              write_log("#{dn} #{status.to_s}")
+              status
             else
               false
             end
           when :safecopy_flushing
-            if stat == :safecopy_flushed
-              write_log("#{dn} #{stat.to_s}")
-              @dbs[dn] = stat
+            if status == :safecopy_flushed
+              write_log("#{dn} #{status.to_s}")
+              @dbs[dn] = status
             else
               false
             end
           when :safecopy_flushed
-            if stat == :cachecleaning
-              write_log("#{dn} #{stat.to_s}")
-              @dbs[dn] = stat
+            if status == :cachecleaning
+              write_log("#{dn} #{status.to_s}")
+              @dbs[dn] = status
             else
               false
             end
           when :cachecleaning
-            if stat == :normal
-              write_log("#{dn} #{stat.to_s}")
-              @dbs[dn] = stat
+            if status == :normal
+              write_log("#{dn} #{status.to_s}")
+              @dbs[dn] = status
               # remove cache
               close_db(@hdbc[dn])
               @hdbc[dn] = nil
               if File.exist?("#{@storage_path}/#{dn}.cache.#{@ext_name}")
                 File.unlink("#{@storage_path}/#{dn}.cache.#{@ext_name}")
               end
-              stat
-            elsif stat == :safecopy_flushing
-              write_log("#{dn} #{stat.to_s}")
-              @dbs[dn] = stat
+              status
+            elsif status == :safecopy_flushing
+              write_log("#{dn} #{status.to_s}")
+              @dbs[dn] = status
             else
               false
             end
@@ -709,7 +709,7 @@ module Roma
         end
       end
 
-      def get_logfile_list
+      def log_files
         l={}
         files=Dir.glob("#{@storage_path}/status.log.*")
         files.each{ |file|
@@ -722,7 +722,7 @@ module Roma
       end
 
       def open_log
-        logs = get_logfile_list
+        logs = log_files
         if logs.length == 0
           @log_name="#{@storage_path}/status.log.1"
         else
