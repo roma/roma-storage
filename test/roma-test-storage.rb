@@ -34,11 +34,11 @@ module StorageTests
     assert_nil( @st.get(0,'abc',0))
   end
 
-  def test_set_get_raw
+  def test_set_raw
     n = 100
     n.times{|i|
       assert_equal('abc_data',@st.set(0,'abc',0,0xffffffff,'abc_data')[4])
-      vn, t, clk, expt, val = @st.get_raw(0,'abc',0)
+      vn, t, clk, expt, val = @st.raw(0,'abc',0)
       assert_equal(vn,0)
       assert(Time.now.to_i - t <= 1)
       assert_equal(clk,i)
@@ -454,16 +454,16 @@ module StorageTests
     }
 
     # :normal -> :safecopy_flushing
-    assert_equal(:safecopy_flushing, @st.set_db_stat(dn, :safecopy_flushing))
+    assert_equal(:safecopy_flushing, @st.update_db_status(dn, :safecopy_flushing))
     # :safecopy_flushing -> :safecopy_flushed
-    assert_equal(:safecopy_flushed, @st.set_db_stat(dn, :safecopy_flushed))
+    assert_equal(:safecopy_flushed, @st.update_db_status(dn, :safecopy_flushed))
 
     (80..99).each{|i|
       @st.set(0,"key#{i}",0,0x7fffffff,"val#{i + 1}")
     }
 
     # :safecopy_flushed -> :cachecleaning
-    assert_equal(:cachecleaning, @st.set_db_stat(dn, :cachecleaning))
+    assert_equal(:cachecleaning, @st.update_db_status(dn, :cachecleaning))
 
     (90..99).each{|i|
       @st.delete(0, "key#{i}", 0)
@@ -476,7 +476,7 @@ module StorageTests
     assert_equal(0, count)
   end
 
-  def test_db_stat_with_each_vn_dump
+  def test_db_status_with_each_vn_dump
     n = 100 # number of data
     m = 10 # number of vnode
     # set data
@@ -492,7 +492,7 @@ module StorageTests
       res = @st.each_vn_dump(vn) do
         assert_equal(false, @st.each_vn_dump(vn){})
         assert_equal(:normal, @st.dbs[dn])
-        assert_equal(false, @st.set_db_stat(dn, :safecopy_flushing))
+        assert_equal(false, @st.update_db_status(dn, :safecopy_flushing))
         count += 1
       end
       assert_equal(n, count)
@@ -500,46 +500,46 @@ module StorageTests
     end
   end
 
-  def test_db_stat
+  def test_db_status
     assert_nil(@st.instance_eval{ @hdbc[0] })
     # :normal -> error case
-    assert_equal(false, @st.set_db_stat(0, :safecopy_flushed))
-    assert_equal(false, @st.set_db_stat(0, :cachecleaning))
-    assert_equal(false, @st.set_db_stat(0, :normal))
+    assert_equal(false, @st.update_db_status(0, :safecopy_flushed))
+    assert_equal(false, @st.update_db_status(0, :cachecleaning))
+    assert_equal(false, @st.update_db_status(0, :normal))
     # :normal -> :safecopy_flushing
-    assert_equal(:safecopy_flushing, @st.set_db_stat(0, :safecopy_flushing))
+    assert_equal(:safecopy_flushing, @st.update_db_status(0, :safecopy_flushing))
     assert_equal(:safecopy_flushing, @st.instance_eval{ @dbs[0] })
     assert(@st.instance_eval{ @hdbc[0] })
 
     # :safecopy_flushing -> error case
-    assert_equal(false, @st.set_db_stat(0, :safecopy_flushing))
-    assert_equal(false, @st.set_db_stat(0, :cachecleaning))
-    assert_equal(false, @st.set_db_stat(0, :normal))
+    assert_equal(false, @st.update_db_status(0, :safecopy_flushing))
+    assert_equal(false, @st.update_db_status(0, :cachecleaning))
+    assert_equal(false, @st.update_db_status(0, :normal))
     # :safecopy_flushing -> :safecopy_flushed
-    assert_equal(:safecopy_flushed, @st.set_db_stat(0, :safecopy_flushed))
+    assert_equal(:safecopy_flushed, @st.update_db_status(0, :safecopy_flushed))
     assert_equal(:safecopy_flushed, @st.instance_eval{ @dbs[0] })
     assert(@st.instance_eval{ @hdbc[0] })
     
     # :safecopy_flushed -> error case
-    assert_equal(false, @st.set_db_stat(0, :safecopy_flushing))
-    assert_equal(false, @st.set_db_stat(0, :safecopy_flushed))
-    assert_equal(false, @st.set_db_stat(0, :normal))
+    assert_equal(false, @st.update_db_status(0, :safecopy_flushing))
+    assert_equal(false, @st.update_db_status(0, :safecopy_flushed))
+    assert_equal(false, @st.update_db_status(0, :normal))
     # :safecopy_flushed -> :cachecleaning
-    assert_equal(:cachecleaning, @st.set_db_stat(0, :cachecleaning))
+    assert_equal(:cachecleaning, @st.update_db_status(0, :cachecleaning))
     assert_equal(:cachecleaning, @st.instance_eval{ @dbs[0] })
     assert(@st.instance_eval{ @hdbc[0] })
 
     # :cachecleaning -> error case
-    assert_equal(false, @st.set_db_stat(0, :safecopy_flushed))
-    assert_equal(false, @st.set_db_stat(0, :cachecleaning))
+    assert_equal(false, @st.update_db_status(0, :safecopy_flushed))
+    assert_equal(false, @st.update_db_status(0, :cachecleaning))
     # :cachecleaning -> :safecopy_flushing
-    assert_equal(:safecopy_flushing, @st.set_db_stat(0, :safecopy_flushing))
+    assert_equal(:safecopy_flushing, @st.update_db_status(0, :safecopy_flushing))
     assert_equal(:safecopy_flushing, @st.instance_eval{ @dbs[0] })
-    assert_equal(:safecopy_flushed, @st.set_db_stat(0, :safecopy_flushed))
-    assert_equal(:cachecleaning, @st.set_db_stat(0, :cachecleaning))
+    assert_equal(:safecopy_flushed, @st.update_db_status(0, :safecopy_flushed))
+    assert_equal(:cachecleaning, @st.update_db_status(0, :cachecleaning))
     assert(@st.instance_eval{ @hdbc[0] })
     # :cachecleaning -> :normal
-    assert_equal(:normal, @st.set_db_stat(0, :normal))
+    assert_equal(:normal, @st.update_db_status(0, :normal))
     assert_equal(:normal, @st.instance_eval{ @dbs[0] })
     assert_nil(@st.instance_eval{ @hdbc[0] })
   end
@@ -548,30 +548,30 @@ module StorageTests
     vn = 0
     dn = @st.instance_eval{ @hdiv[vn] }
     assert_equal('abc_data', @st.set(vn,'abc',0,0xffffffff,'abc_data')[4])
-    assert( @st.get_context(vn, 'abc', 0)[2] == 0 )
+    assert( @st.context(vn, 'abc', 0)[2] == 0 )
     # :normal -> :safecopy_flushing
-    assert_equal(:safecopy_flushing, @st.set_db_stat(dn, :safecopy_flushing))
+    assert_equal(:safecopy_flushing, @st.update_db_status(dn, :safecopy_flushing))
     assert_equal('abc_data', @st.set(vn,'abc',0,0xffffffff,'abc_data')[4])
-    assert( @st.get_context(vn, 'abc', 0)[2] == 1 )
+    assert( @st.context(vn, 'abc', 0)[2] == 1 )
     # :safecopy_flushing -> :safecopy_flushed
-    assert_equal(:safecopy_flushed, @st.set_db_stat(dn, :safecopy_flushed))
+    assert_equal(:safecopy_flushed, @st.update_db_status(dn, :safecopy_flushed))
     assert_equal('abc_data', @st.set(vn,'abc',0,0xffffffff,'abc_data')[4])
-    assert( @st.get_context(vn, 'abc', 0)[2] == 2 )
+    assert( @st.context(vn, 'abc', 0)[2] == 2 )
     # :safecopy_flushed -> :cachecleaning
-    assert_equal(:cachecleaning, @st.set_db_stat(dn, :cachecleaning))
+    assert_equal(:cachecleaning, @st.update_db_status(dn, :cachecleaning))
     assert_equal('abc_data', @st.set(vn,'abc',0,0xffffffff,'abc_data')[4])
-    assert( @st.get_context(vn, 'abc', 0)[2] == 3 )
+    assert( @st.context(vn, 'abc', 0)[2] == 3 )
     # :cachecleaning -> :normal
-    assert_equal(:normal, @st.set_db_stat(dn, :normal))
+    assert_equal(:normal, @st.update_db_status(dn, :normal))
     assert_equal('abc_data', @st.set(vn,'abc',0,0xffffffff,'abc_data')[4])
-    assert( @st.get_context(vn, 'abc', 0)[2] == 4 )
+    assert( @st.context(vn, 'abc', 0)[2] == 4 )
   end
 
   def test_set_get_in_safecopy
     vn = 0
     dn = @st.instance_eval{ @hdiv[vn] }
     # :normal -> :safecopy_flushing
-    assert_equal(:safecopy_flushing, @st.set_db_stat(dn, :safecopy_flushing))
+    assert_equal(:safecopy_flushing, @st.update_db_status(dn, :safecopy_flushing))
     assert_equal(:safecopy_flushing, @st.instance_eval{ @dbs[dn] })
     assert_equal('abc_data', @st.set(vn,'abc',0,0xffffffff,'abc_data')[4])
     assert_equal('abc_data', @st.get(vn,'abc',0) )
@@ -581,7 +581,7 @@ module StorageTests
     assert(@st.instance_eval{ @hdbc[dn].get('abc') })
 
     # :safecopy_flushing -> :safecopy_flushed
-    assert_equal(:safecopy_flushed, @st.set_db_stat(dn, :safecopy_flushed))
+    assert_equal(:safecopy_flushed, @st.update_db_status(dn, :safecopy_flushed))
     assert_equal(:safecopy_flushed, @st.instance_eval{ @dbs[dn] })
     assert_equal('def_data', @st.set(vn,'def',0,0xffffffff,'def_data')[4])
     assert_equal('def_data', @st.get(vn,'def',0) )
@@ -597,13 +597,13 @@ module StorageTests
     assert_equal( 'abc_data',@st.set(vn,'abc',0,0xffffffff,'abc_data')[4])
     assert_equal( 'abc_data', @st.get(vn,'abc',0) ) # database
     # :normal -> :safecopy_flushing
-    assert_equal(:safecopy_flushing, @st.set_db_stat(dn, :safecopy_flushing))
+    assert_equal(:safecopy_flushing, @st.update_db_status(dn, :safecopy_flushing))
     # :safecopy_flushing -> :safecopy_flushed
-    assert_equal(:safecopy_flushed, @st.set_db_stat(dn, :safecopy_flushed))
+    assert_equal(:safecopy_flushed, @st.update_db_status(dn, :safecopy_flushed))
     assert_equal( 'abc_data1',@st.set(vn,'abc',0,0xffffffff,'abc_data1')[4])
     assert_equal( 'abc_data1', @st.get(vn,'abc',0) ) # cache
     # :safecopy_flushed -> :cachecleaning
-    assert_equal(:cachecleaning, @st.set_db_stat(dn, :cachecleaning))
+    assert_equal(:cachecleaning, @st.update_db_status(dn, :cachecleaning))
     assert_equal( 'abc_data1', @st.get(vn,'abc',0) ) # cache
     assert_equal( 'abc_data2',@st.set(vn,'abc',0,0xffffffff,'abc_data2')[4])
     assert_equal( 'abc_data2', @st.get(vn,'abc',0) ) # database
@@ -613,7 +613,7 @@ module StorageTests
     vn = 0
     dn = @st.instance_eval{ @hdiv[vn] }
     # :normal -> :safecopy_flushing
-    assert_equal(:safecopy_flushing, @st.set_db_stat(dn, :safecopy_flushing))
+    assert_equal(:safecopy_flushing, @st.update_db_status(dn, :safecopy_flushing))
     assert_equal(:safecopy_flushing, @st.instance_eval{ @dbs[dn] })
     assert_equal('abc_data', @st.set(vn,'abc',0,0xffffffff,'abc_data')[4])
     assert_equal('abc_data', @st.get(vn,'abc',0) )
@@ -633,7 +633,7 @@ module StorageTests
     vn = 0
     dn = @st.instance_eval{ @hdiv[vn] }
     # :normal -> :safecopy_flushing
-    assert_equal(:safecopy_flushing, @st.set_db_stat(dn, :safecopy_flushing))
+    assert_equal(:safecopy_flushing, @st.update_db_status(dn, :safecopy_flushing))
     keys = []
     10.times do |i|
       k = "key#{i}"
@@ -652,11 +652,11 @@ module StorageTests
     end
   end
 
-  def test_get_keys_in_cache
+  def test_keys_in_cache
     vn = 0
     dn = @st.instance_eval{ @hdiv[vn] }
     # :normal -> :safecopy_flushing
-    assert_equal(:safecopy_flushing, @st.set_db_stat(dn, :safecopy_flushing))
+    assert_equal(:safecopy_flushing, @st.update_db_status(dn, :safecopy_flushing))
     keys = []
     100.times do |i|
       k = "key#{i}"
@@ -666,7 +666,7 @@ module StorageTests
 
     assert(@st.instance_eval{ @hdbc[dn].rnum } == 100)
     10.times do
-      keys = @st.get_keys_in_cache(dn, 10)
+      keys = @st.keys_in_cache(dn, 10)
       assert(keys.length == 10)
       keys.each do |k|
         @st.out_cache(dn, k)

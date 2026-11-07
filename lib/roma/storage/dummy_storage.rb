@@ -8,7 +8,7 @@ module Roma
       def init(*args); end
       def opendb(fname,divnum); end
       def closedb; end
-      def get_context(vn, k, d) nil; end
+      def context(vn, k, d) nil; end
       def rset(vn, k, d, lclock, exptime, v); end
       def set(vn, k, d, exptime, v); end
       def add(vn, k, d, exptime, v); end
@@ -27,13 +27,13 @@ module Roma
 
       # Returns the vnode dump.
       def dump(vn)
-        Marshal.dump(get_vnode_hash(vn))
+        Marshal.dump(vnode_hash(vn))
       end
 
       private
 
       # Create vnode dump.
-      def get_vnode_hash(vn)
+      def vnode_hash(vn)
         {'dummy'=>'dummy'}
       end
     end
