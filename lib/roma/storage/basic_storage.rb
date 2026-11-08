@@ -138,7 +138,28 @@ module Roma
       def unpack_data(str)
         str.unpack(PACK_TEMPLATE)
       end
-      private :pack_header, :unpack_header, :pack_data, :unpack_data
+
+      # The fields of a packed record, without unpacking the others, which
+      # makes objects.
+      def logical_clock_of(str)
+        uint32_at(str, 8)
+      end
+      def expire_of(str)
+        uint32_at(str, 12)
+      end
+      def value_of(str)
+        str.byteslice(16, str.bytesize - 16)
+      end
+      def uint32_at(str, i)
+        (str.getbyte(i) << 24) | (str.getbyte(i + 1) << 16) | (str.getbyte(i + 2) << 8) | str.getbyte(i + 3)
+      end
+
+      # The unix time, without making a Time.
+      def now
+        Process.clock_gettime(Process::CLOCK_REALTIME, :second)
+      end
+      private :pack_header, :unpack_header, :pack_data, :unpack_data,
+              :logical_clock_of, :expire_of, :value_of, :uint32_at, :now
 
       def db_get(vn, k)
         n = @hdiv[vn]
@@ -207,11 +228,10 @@ module Roma
         buf = db_get(vn, k)
         clk = 0
         if buf
-          data = unpack_data(buf)
-          clk = (data[2] + 1) & 0xffffffff
+          clk = (logical_clock_of(buf) + 1) & 0xffffffff
         end
 
-        ret = [vn, Time.now.to_i, clk, expt, v]
+        ret = [vn, now, clk, expt, v]
         return ret if db_put(vn , k, pack_data(*ret))
         nil
       end
@@ -276,10 +296,9 @@ module Roma
       def get(vn, k, d)
         buf = db_get(vn, k)
         return nil unless buf
-        vn, _t, _clk, expt, v = unpack_data(buf)
+        return nil if now > expire_of(buf)
 
-        return nil if Time.now.to_i > expt
-        v
+        value_of(buf)
       end
 
       def raw(vn, k, d)
