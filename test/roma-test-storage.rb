@@ -15,6 +15,14 @@ module StorageTests
     assert_equal( 'abc_data', @st.get(0,'abc',0) )
   end
 
+  def test_set_get_binary
+    value = [0xff, 0, 0xe3, 0x81, 0x82].pack('C*')
+    @st.set(0,'abc',0,0xffffffff,value)
+    assert_equal(value, @st.get(0,'abc',0))
+    assert_equal('', @st.set(0,'empty',0,0xffffffff,'')[4])
+    assert_equal('', @st.get(0,'empty',0))
+  end
+
   def test_set_delete
     @st.set(0,'abc',0,0xffffffff,'abc_data')
     # delete method returns a value
