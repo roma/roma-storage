@@ -16,6 +16,20 @@ class HashStorageTest < Test::Unit::TestCase
   def teardown
   end
 
+  # Keys set while it runs don't break it.
+  def test_each_clean_up_with_new_keys
+    @st.set(0, 'old', 0, 0xffffffff, 'v')
+    @st.delete(0, 'old', 0)
+    @st.each_clean_up_sleep = 0
+    keys = []
+    @st.each_clean_up(Time.now.to_i + 100, { 0 => :primary }) do |k, _vn|
+      @st.set(0, 'new', 0, 0xffffffff, 'v')
+      keys << k
+    end
+    assert_equal(['old'], keys)
+    assert_equal('v', @st.get(0, 'new', 0))
+  end
+
   def test_database_stats
     assert_equal([], @st.database_stats)
   end
