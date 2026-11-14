@@ -298,6 +298,20 @@ module StorageTests
     assert_equal(10,cnt)
   end
 
+  # A key is deleted only if the block returns true.
+  def test_each_clean_up_keeps_what_the_block_keeps
+    vnhash = { 0 => :primary }
+    %w(keep drop).each do |k|
+      @st.set(0, k, 0, 0xffffffff, 'v')
+      @st.delete(0, k, 0)
+    end
+    @st.each_clean_up_sleep = 0
+    @st.each_clean_up(Time.now.to_i + 100, vnhash) { |k, _vn| k == 'drop' }
+    keys = []
+    @st.each_clean_up(Time.now.to_i + 100, vnhash) { |k, _vn| keys << k }
+    assert_equal(['keep'], keys)
+  end
+
   def test_each_clean_up2
     n=10
 

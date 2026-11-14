@@ -23,26 +23,14 @@ module Roma
       end
 
       if RUBY_VERSION >= '1.9.2'
-        def each_clean_up(t, vnhash)
-          @do_clean_up = true
-          nt = Time.now.to_i
-          @hdb.each{ |hdb|
-            keys = hdb.keys
-            keys.each{ |k|
-              v = hdb[k]
-              return unless @do_clean_up
-              vn, last, _clk, expt = unpack_header(v)
-              vn_stat = vnhash[vn]
-              if vn_stat == :primary && ( (expt != 0 && nt > expt) || (expt == 0 && t > last) )
-                yield k, vn
-                hdb.out(k) if hdb.get(k) == v
-              elsif vn_stat == nil && t > last
-                yield k, vn
-                hdb.out(k) if hdb.get(k) == v
-              end
-              sleep @each_clean_up_sleep
-            }
-          }
+        # Yields the keys that the database has when it starts: a Hash can't
+        # take a new key while it is iterated, and the requests set keys
+        # while each_clean_up sleeps. A key deleted meanwhile is skipped.
+        def each_record(hdb)
+          hdb.keys.each do |k|
+            v = hdb[k]
+            yield k, v if v
+          end
         end
 
         def each_unpacked_db(target_vn, db)

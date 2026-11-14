@@ -434,7 +434,7 @@ module Roma
         @divnum.times do |i|
           next if @dbs[i] != :normal
           hdb = @hdb[i]
-          hdb.each do |k, v|
+          each_record(hdb) do |k, v|
             return unless @do_clean_up # 1st check
             vn, last, clk, expt = unpack_header(v)
             vn_stat = vnhash[vn]
@@ -461,6 +461,11 @@ module Roma
           @cleanup_regexp = nil
           f.close
         end
+      end
+
+      # Yields each key and value of the database +hdb+, for each_clean_up.
+      def each_record(hdb, &block)
+        hdb.each(&block)
       end
 
       def stop_clean_up(&block)
